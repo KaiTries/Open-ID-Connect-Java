@@ -52,11 +52,17 @@ public class AuthTests {
     }
 
     @Test
-    public void testGetIssuerFromWebID() throws IOException, InterruptedException {
-        String issuer = OpenIdProviders.getIssuerFromWebID(WEBID_SOLID_COMMUNITY);
+    public void testGetIssuerFromWebID() throws IOException {
+        String issuer = OAuthHttpHandler.getIssuerFromWebID(WEBID_SOLID_COMMUNITY);
         Assertions.assertEquals(
                 ISSUER_URI,
                 issuer
+        );
+
+        String invalidIssuer = OAuthHttpHandler.getIssuerFromWebID("http://www.w3.org/ns/solid/terms#oidcIssuer");
+        Assertions.assertEquals(
+                "RDF parse Error",
+                invalidIssuer
         );
     }
 
@@ -134,6 +140,7 @@ public class AuthTests {
         provider.register();
         var LOGIN_URL = provider.getAuthUrl(state, OAuthUtils.generateCodeChallenge(verifier));
 
+
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(LOGIN_URL)).GET().build();
 
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -142,5 +149,7 @@ public class AuthTests {
                 302,
                 response.statusCode()
         );
+
+        //
     }
 }
